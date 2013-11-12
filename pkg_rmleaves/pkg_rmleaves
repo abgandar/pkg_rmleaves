@@ -53,7 +53,7 @@ esci() {
 		fi
 	fi
 	echo "$1" >&2
-#	rm -r "$TMPDIR"
+	rm -r "$TMPDIR"
 	exit $2
 }
 
@@ -63,11 +63,11 @@ checkLeafs() {
 	if [ -n "$use_pkgng" ]; then
 		pkg query -e '%#r = 0' '"%n-%v" "%sh" "off" "%c"' | sort > "$PKGFILE"
 	else
-		for i in "/var/db/pkg/*"; do
+		for i in "/var/db/pkg/"*; do
 			if [ ! -s "$i/+REQUIRED_BY" ]; then 
 				pkg=$(basename "$i")
-				desc=$(cat "$i/+COMMENT") 2>/dev/null
-				desc=${desc//\"/\\\"}
+				desc=''
+				[ -f "$i/+COMMENT" ] && desc=$(cat "$i/+COMMENT")
 				echo "\"$pkg\" \"\" \"off\" \"$desc\""
 			fi
 		done | sort >>"$PKGFILE"
@@ -106,7 +106,7 @@ END
 	fi
 
 	pkgdelete="pkg_delete"
-	[ -n "$use_pkgng" ] && pkgdelete="pkg delete"
+	[ -n "$use_pkgng" ] && pkgdelete="pkg delete -y"
 	pkgs=$(cat "$TMPFILE")
 	set -- $pkgs
 	i=0
@@ -117,7 +117,7 @@ END
 		echo "$percent"
 		echo "Deinstalling $p"
 		echo "XXX"
-		eval $pkgdelete -y "$p"
+		eval $pkgdelete "$p"
 	done | "$DIALOG" --clear --gauge "Starting to remove packages" 0 65 0
 }
 
@@ -158,12 +158,11 @@ for i; do
 	esac
 done
 
+MAX=0
 if [ "$DIALOG" = "Xdialog" ]; then
-	MAX=0
 	LINES=0
 elif [ "$DIALOG" = "dialog" ]; then
 	export DIALOG_ESC=1
-	MAX=0
 	LINES=13
 fi
 
@@ -180,8 +179,8 @@ while true; do
 		esci "No more leaves found." 0
 	fi
 
-	$DIALOG --yesno "Do you want to process the new leaves packages?" $MAX $MAX
-	
+	$DIALOG --clear --yesno "Do you want to process the new leaves packages?" $MAX $MAX
+
 	if [ $? != 0 ]; then
 		esci "Program Terminated Successfully" 0
 	fi
