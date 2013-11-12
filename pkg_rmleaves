@@ -1,0 +1,190 @@
+#!/bin/sh
+#
+# Copyright (c) 2013 Alexander Wittig <alexander@wittig.name>
+# Copyright (c) 2005 Timothy Redaelli <drizzt@freesbie.org>
+#
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE REGENTS AND CONTRIBUTORS ``AS IS'' AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+# OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+# HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
+# OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+
+# Interactive script for deinstalling "leaf" packages
+#
+# Syntax: pkg_rmleaves [-l] [-d] [-x] [-X] [-k]
+# Options:
+#	-l: List leaf packages only, don't ask if they should be deinstalled
+#	-d: Use dialog (default)
+#	-x: Use Xdialog
+#	-X: Use Xdialog in high compatibility mode
+#	-k: Use kdialog
+
+TMPDIR=`mktemp -dt pkg_rmleaves`	#Directory where i keep the temporary files
+TMPFILE="$TMPDIR/tmp"				#Generic use temporary file
+DLGFILE="$TMPDIR/dlg"				#Dialog arguments
+PKGFILE="$TMPDIR/pkgs"				#Unfiltered package file
+PREC="$TMPDIR/prec"					#Precedent unfiltered leaves file
+
+# esci()
+# print a message into stderr, delete the temp dir and exit
+esci() {
+	if [ "$DIALOG" = "kdialog" -o "$DIALOG" = "Xdialog" ]; then
+		if [ $2 -eq 0 ]; then
+			$DIALOG --msgbox "$1" 0 0
+		else
+			$DIALOG --error "$1" 0 0
+		fi
+	fi
+	echo "$1" >&2
+#	rm -r "$TMPDIR"
+	exit $2
+}
+
+# checkLeafs()
+# update leaf files
+checkLeafs() {
+	if [ -n "$use_pkgng" ]; then
+		pkg query -e '%#r = 0' '"%n-%v" "%sh" "off" "%c"' | sort > "$PKGFILE"
+	else
+		for i in "/var/db/pkg/*"; do
+			if [ ! -s "$i/+REQUIRED_BY" ]; then 
+				pkg=$(basename "$i")
+				desc=$(cat "$i/+COMMENT") 2>/dev/null
+				desc=${desc//\"/\\\"}
+				echo "\"$pkg\" \"\" \"off\" \"$desc\""
+			fi
+		done | sort >>"$PKGFILE"
+	fi
+
+	if [ -f "$PREC" ]; then
+		diff --unchanged-line-format='' --old-line-format='' --new-line-format='%L' "$PREC" "$PKGFILE" >"$TMPFILE"
+	else
+		cp "$PKGFILE" "$TMPFILE"
+	fi
+	mv "$PKGFILE" "$PREC"
+}
+
+# the main
+main() {
+	if [ ! -s "$TMPFILE" ]; then
+		esci "No leaves found." 0
+	fi
+
+	cat <<END >"$DLGFILE"
+--item-help --clear --scrollbar --cr-wrap --aspect 16
+--title "Welcome to pkg_rmleaves"
+--checklist "These are the leaf packages installed on your system.\nChoose the packages to deinstall:"
+$MAX $MAX $LINES
+END
+	cat "$TMPFILE" >>"$DLGFILE"
+	"$DIALOG" --file "$DLGFILE" 2>"$TMPFILE"
+	if [ $? = 255 ]; then
+		esci "Dialog Error, try to resize your terminal to at least 80x24" 1
+	fi
+
+	rm "$DLGFILE"
+
+	if [ ! -s "$TMPFILE" ]; then
+		esci "Program Terminated Successfully" 0
+	fi
+
+	pkgdelete="pkg_delete"
+	[ -n "$use_pkgng" ] && pkgdelete="pkg delete"
+	pkgs=$(cat "$TMPFILE")
+	set -- $pkgs
+	i=0
+	for p; do
+		i=$((i+1))
+		percent=$((100*$i/$#))
+		echo "XXX"
+		echo "$percent"
+		echo "Deinstalling $p"
+		echo "XXX"
+		eval $pkgdelete -y "$p"
+	done | "$DIALOG" --clear --gauge "Starting to remove packages" 0 65 0
+}
+
+# Call the functions
+
+# Trap ctrl+c and delete the temporary dir
+trap "esci \"Ctrl+C Pressed, Program Aborted\" 1" INT
+
+# Determine if pkgng is used on this machine (code taken from portmaster)
+TMPDIR=/dev/null ASSUME_ALWAYS_YES=1 PACKAGESITE=file:///nonexistent \
+pkg info -x 'pkg(-devel)?$' >/dev/null 2>&1 && use_pkgng=yes
+
+# Use dialog as default DIALOG
+DIALOG=dialog
+
+args=`getopt ldxXk $*`
+set -- $args
+for i; do
+	case "$i" in
+		-l)
+			checkLeafs
+			cat "$PKGFILE"
+			esci "Program Terminated Successfully" 0
+			break;;
+		-d)
+			DIALOG=dialog
+			break;;
+		-x)
+			DIALOG=Xdialog
+			break;;
+		-X)
+			DIALOG=Xdialog
+			export XDIALOG_HIGH_DIALOG_COMPAT=1
+			break;;
+		-k)
+			DIALOG=kdialog
+			break;;
+	esac
+done
+
+if [ "$DIALOG" = "Xdialog" ]; then
+	MAX=0
+	LINES=0
+elif [ "$DIALOG" = "dialog" ]; then
+	export DIALOG_ESC=1
+	MAX=0
+	LINES=13
+fi
+
+if ! which -s "$DIALOG"; then
+	esci "$DIALOG not found." 1
+fi
+
+checkLeafs
+
+while true; do
+	main
+	checkLeafs
+	if [ ! -s "$TMPFILE" ]; then
+		esci "No more leaves found." 0
+	fi
+
+	$DIALOG --yesno "Do you want to process the new leaves packages?" $MAX $MAX
+	
+	if [ $? != 0 ]; then
+		esci "Program Terminated Successfully" 0
+	fi
+done
+
+# vim: set ts=4:
