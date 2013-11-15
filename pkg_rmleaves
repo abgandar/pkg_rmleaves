@@ -61,7 +61,7 @@ esci() {
 # update leaf files
 checkLeafs() {
 	if [ -n "$use_pkgng" ]; then
-		pkg query -e '%#r = 0' '"%n-%v" "%sh" "off" "%c"' | sort > "$PKGFILE"
+		pkg query -e '%#r = 0' '"%n-%v" "%sh" "off" "%c"' | sort >"$PKGFILE"
 	else
 		for i in "/var/db/pkg/"*; do
 			if [ ! -s "$i/+REQUIRED_BY" ]; then 
@@ -95,23 +95,20 @@ $MAX $MAX $LINES
 END
 	cat "$TMPFILE" >>"$DLGFILE"
 	"$DIALOG" --file "$DLGFILE" 2>"$TMPFILE"
+	rm "$DLGFILE"
 	if [ $? = 255 ]; then
 		esci "Dialog Error, try to resize your terminal to at least 80x24" 1
 	fi
-
-	rm "$DLGFILE"
 
 	if [ ! -s "$TMPFILE" ]; then
 		esci "Program Terminated Successfully" 0
 	fi
 
-	pkgdelete="pkg_delete"
-	[ -n "$use_pkgng" ] && pkgdelete="pkg delete -y"
 	pkgs=$(cat "$TMPFILE")
 	set -- $pkgs
 	i=0
 	for p; do
-		i=$((i+1))
+		i=$(($i+1))
 		percent=$((100*$i/$#))
 		echo "XXX"
 		echo "$percent"
@@ -124,22 +121,27 @@ END
 # Call the functions
 
 # Trap ctrl+c and delete the temporary dir
-trap "esci \"Ctrl+C Pressed, Program Aborted\" 1" INT
+trap 'esci "Ctrl+C Pressed, Program Aborted" 1' INT
 
 # Determine if pkgng is used on this machine (code taken from portmaster)
 TMPDIR=/dev/null ASSUME_ALWAYS_YES=1 PACKAGESITE=file:///nonexistent \
 pkg info -x 'pkg(-devel)?$' >/dev/null 2>&1 && use_pkgng=yes
+if [ -n "$use_pkgng" ]; then
+	pkgdelete="pkg delete -y"
+else
+	pkgdelete="pkg_delete"
+fi
 
 # Use dialog as default DIALOG
 DIALOG=dialog
 
-args=`getopt ldxXk $*`
+args=$(getopt ldxXk $*)
 set -- $args
 for i; do
 	case "$i" in
 		-l)
 			checkLeafs
-			cat "$PKGFILE"
+			cat "$TMPFILE"
 			esci "Program Terminated Successfully" 0
 			break;;
 		-d)
@@ -171,7 +173,6 @@ if ! which -s "$DIALOG"; then
 fi
 
 checkLeafs
-
 while true; do
 	main
 	checkLeafs
@@ -186,4 +187,3 @@ while true; do
 	fi
 done
 
-# vim: set ts=4:
