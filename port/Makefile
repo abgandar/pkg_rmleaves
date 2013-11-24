@@ -7,7 +7,7 @@ CATEGORIES=	ports-mgmt
 MASTER_SITES=	http://alex.wittig.name/${PORTNAME}/
 
 MAINTAINER=	alexander@wittig.name
-COMMENT=	Interactive script for deinstalling 'leaf' packages
+COMMENT=	Interactive script for deinstalling leaf packages
 
 NO_BUILD=	yes
 
