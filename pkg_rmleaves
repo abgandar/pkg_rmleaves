@@ -54,7 +54,7 @@ esci() {
 		fi
 	fi
 	echo "$1" >&2
-	rm -r "$TMPDIR"
+#	rm -r "$TMPDIR"
 	exit $2
 }
 
@@ -99,14 +99,16 @@ END
 		set -- $pkgs
 		i=0
 		for p; do
-			i=$(($i+1))
 			percent=$((100*$i/$#))
+			i=$(($i+1))
 			echo "XXX"
 			echo "$percent"
 			echo "Deinstalling $p"
 			echo "XXX"
-			eval $PKGDELETE "$p"
-		done | "$DIALOG" --clear --gauge "Starting to remove packages" 0 65 0
+			eval $PKGDELETE "$p" > /dev/null
+		done > /dev/null
+# dialog core dumps on FBSD 10 when this is piped into it
+#| "$DIALOG" --clear --gauge "Starting to remove packages" 10 65 0
 	fi
 }
 
@@ -125,7 +127,7 @@ PKGDELETE="pkg_delete"
 
 # Determine if pkgng is used on this machine (code taken from portmaster)
 TMPDIR=/dev/null ASSUME_ALWAYS_YES=1 PACKAGESITE=file:///nonexistent \
-pkg info -x 'pkg(-devel)?$' > /dev/null 2>&1 && USE_PKGNG=yes && PKGDELETE="pkg delete -y"
+pkg info -x 'pkg(-devel)?$' > /dev/null 2>&1 && USE_PKGNG=yes && PKGDELETE="pkg delete -y -q"
 
 # Handle command line arguments
 for i in $(getopt ldxXk $*); do
