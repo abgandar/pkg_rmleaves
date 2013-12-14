@@ -54,7 +54,7 @@ esci() {
 		fi
 	fi
 	echo "$1" >&2
-#	rm -r "$TMPDIR"
+	rm -r "$TMPDIR"
 	exit $2
 }
 
