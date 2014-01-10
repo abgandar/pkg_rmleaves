@@ -2,12 +2,14 @@
 # $FreeBSD: head/ports-mgmt/pkg_rmleaves/Makefile 328554 2013-09-28 06:58:46Z eadler $
 
 PORTNAME=	pkg_rmleaves
-PORTVERSION=	20131111
+PORTVERSION=	20140110
 CATEGORIES=	ports-mgmt
 MASTER_SITES=	http://alex.wittig.name/${PORTNAME}/
 
 MAINTAINER=	alexander@wittig.name
 COMMENT=	Interactive script for deinstalling leaf packages
+
+LICENSE=	BSD2CLAUSE
 
 NO_BUILD=	yes
 
