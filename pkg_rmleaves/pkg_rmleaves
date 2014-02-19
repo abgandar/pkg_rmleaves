@@ -61,17 +61,17 @@ esci() {
 # update leaf files
 checkLeafs() {
 	if [ -n "$USE_PKGNG" ]; then
-		pkg query -e '%#r = 0' '"%n-%v" "%sh" "off" "%c"'
+		pkg query -e '%#r = 0' '#&quot;#%n-%v#&quot;# #&quot;#%sh#&quot;# #&quot;#off#&quot;# #&quot;#%c#&quot;#'
 	else
 		for i in "$PKGDIR/"*; do
 			if [ ! -s "$i/+REQUIRED_BY" ]; then 
 				pkg=$(basename "$i")
 				desc=''
 				[ -f "$i/+COMMENT" ] && desc=$(cat "$i/+COMMENT")
-				echo "\"$pkg\" \"\" \"off\" \"$desc\""
+				echo "#&quot;#$pkg#&quot;# #&quot;##&quot;# #&quot;#off#&quot;# #&quot;#$desc#&quot;#"
 			fi
 		done
-	fi | sort > "$PKGFILE"
+	fi | sort | sed -e 'y/"/_/' -e 's/#&quot;#/"/g' > "$PKGFILE"
 
 	if [ -f "$PREV" ]; then
 		diff --unchanged-line-format='' --old-line-format='' --new-line-format='%L' "$PREV" "$PKGFILE" > "$TMPFILE"
