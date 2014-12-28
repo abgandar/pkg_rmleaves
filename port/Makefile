@@ -1,8 +1,8 @@
 # Created by: Timothy Redaelli <drizzt@gufi.org>
-# $FreeBSD: head/ports-mgmt/pkg_rmleaves/Makefile 335361 2013-12-01 03:41:06Z eadler $
+# $FreeBSD: head/ports-mgmt/pkg_rmleaves/Makefile 342276 2014-02-02 12:09:20Z matthew $
 
 PORTNAME=	pkg_rmleaves
-PORTVERSION=	20140110
+PORTVERSION=	20140222
 CATEGORIES=	ports-mgmt
 MASTER_SITES=	http://alex.wittig.name/${PORTNAME}/
 
@@ -13,7 +13,7 @@ LICENSE=	BSD2CLAUSE
 
 NO_BUILD=	yes
 
-WRKSRC=		${WRKDIR}/${PORTNAME}
+WRKSRC=		${WRKDIR}
 
 PLIST_FILES=	sbin/pkg_rmleaves man/man1/pkg_rmleaves.1.gz
 
