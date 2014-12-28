@@ -4,7 +4,7 @@
 PORTNAME=	pkg_rmleaves
 PORTVERSION=	20140222
 CATEGORIES=	ports-mgmt
-MASTER_SITES=	http://alex.wittig.name/${PORTNAME}/
+MASTER_SITES=	http://files.wittig.name/${PORTNAME}/
 
 MAINTAINER=	alexander@wittig.name
 COMMENT=	Interactive script for deinstalling leaf packages
@@ -12,8 +12,6 @@ COMMENT=	Interactive script for deinstalling leaf packages
 LICENSE=	BSD2CLAUSE
 
 NO_BUILD=	yes
-
-WRKSRC=		${WRKDIR}
 
 PLIST_FILES=	sbin/pkg_rmleaves man/man1/pkg_rmleaves.1.gz
 
