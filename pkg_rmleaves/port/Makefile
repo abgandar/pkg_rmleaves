@@ -2,7 +2,7 @@
 # $FreeBSD: head/ports-mgmt/pkg_rmleaves/Makefile 342276 2014-02-02 12:09:20Z matthew $
 
 PORTNAME=	pkg_rmleaves
-PORTVERSION=	20141228
+PORTVERSION=	20190108
 CATEGORIES=	ports-mgmt
 MASTER_SITES=	http://files.wittig.name/${PORTNAME}/
 
