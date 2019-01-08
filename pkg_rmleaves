@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2013 Alexander Wittig <alexander@wittig.name>
+# Copyright (c) 2019 Alexander Wittig <alexander@wittig.name>
 # Copyright (c) 2005 Timothy Redaelli <drizzt@freesbie.org>
 #
 # All rights reserved.
@@ -74,7 +74,8 @@ checkLeafs() {
 	fi | sort | sed -e "y/\"/'/" -e 's/#&quot;#/"/g' > "$PKGFILE"
 
 	if [ -f "$PREV" ]; then
-		diff --unchanged-line-format='' --old-line-format='' --new-line-format='%L' "$PREV" "$PKGFILE" > "$TMPFILE"
+		comm -1 -3 "$PREV" "$PKGFILE" > "$TMPFILE"
+#		diff --unchanged-line-format='' --old-line-format='' --new-line-format='%L' "$PREV" "$PKGFILE" > "$TMPFILE"
 	else
 		cp "$PKGFILE" "$TMPFILE"
 	fi
