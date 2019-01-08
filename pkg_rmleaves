@@ -75,7 +75,6 @@ checkLeafs() {
 
 	if [ -f "$PREV" ]; then
 		comm -1 -3 "$PREV" "$PKGFILE" > "$TMPFILE"
-#		diff --unchanged-line-format='' --old-line-format='' --new-line-format='%L' "$PREV" "$PKGFILE" > "$TMPFILE"
 	else
 		cp "$PKGFILE" "$TMPFILE"
 	fi
