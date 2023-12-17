@@ -1,20 +1,18 @@
-# Created by: Timothy Redaelli <drizzt@gufi.org>
-# $FreeBSD: head/ports-mgmt/pkg_rmleaves/Makefile 342276 2014-02-02 12:09:20Z matthew $
-
 PORTNAME=	pkg_rmleaves
-PORTVERSION=	20190108
+PORTVERSION=	20231217
 CATEGORIES=	ports-mgmt
 MASTER_SITES=	https://files.wittig.name/${PORTNAME}/ \
 		http://files.wittig.name/${PORTNAME}/
 
 MAINTAINER=	alexander@wittig.name
 COMMENT=	Interactive script for deinstalling leaf packages
+WWW=		https://alex.wittig.name/en/90Software/70pkg_rmleaves.html
 
 LICENSE=	BSD2CLAUSE
 
-NO_BUILD=	yes
+RUN_DEPENDS=	bsddialog:devel/bsddialog
 
-WRKSRC=		${WRKDIR}
+NO_BUILD=	yes
 
 PLIST_FILES=	sbin/pkg_rmleaves man/man1/pkg_rmleaves.1.gz
 
