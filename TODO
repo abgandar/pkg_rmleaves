@@ -1,3 +1,2 @@
-- figure out what happened to dialog on FBSD 10
-- check with Xdialog/kdialog etc.?
-
+- remove old pkg_* tools support
+- Add (optional?) log of all operations performed
