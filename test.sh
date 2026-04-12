@@ -10,5 +10,5 @@ for p; do
 	echo "Testing $p"
 	echo "XXX"
 	sleep 1
-done | tee log | dialog --trace dlog --gauge "Starting the test" 10 30 0
+done | tee log | bsddialog --trace dlog --gauge "Starting the test" 10 30 0
 

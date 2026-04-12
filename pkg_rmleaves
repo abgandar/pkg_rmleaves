@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2023 Alexander Wittig <alexander@wittig.name>
+# Copyright (c) 2025 Alexander Wittig <alexander@wittig.name>
 # Copyright (c) 2005 Timothy Redaelli <drizzt@freesbie.org>
 #
 # All rights reserved.
@@ -53,7 +53,7 @@ checkLeafs() {
 		pkg query -e '%#r = 0' '#&quot;#%n-%v#&quot;# #&quot;#%sh#&quot;# #&quot;#off#&quot;# #&quot;#%c#&quot;#'
 	else
 		for i in "$PKGDIR/"*; do
-			if [ ! -s "$i/+REQUIRED_BY" ]; then 
+			if [ ! -s "$i/+REQUIRED_BY" ]; then
 				pkg=$(basename "$i")
 				desc=''
 				[ -f "$i/+COMMENT" ] && desc=$(cat "$i/+COMMENT")
@@ -72,14 +72,12 @@ checkLeafs() {
 
 # display the list of leaves
 showList() {
-	cat <<END > "$DLGFILE"
---item-bottom-desc --separate-output --clear-screen --cr-wrap
---title "Welcome to pkg_rmleaves"
---checklist "These are the leaf packages installed on your system.\nChoose the packages to deinstall:"
-$MAX $MAX $LINES
-END
 	cat "$TMPFILE" >> "$DLGFILE"
-	xargs -o "$DIALOG" < "$DLGFILE" 2> "$TMPFILE"
+	xargs -o -L "$MAXPKGS" "$DIALOG" \
+		  --item-bottom-desc --separate-output --clear-screen --cr-wrap --title "Welcome to pkg_rmleaves" \
+		  --checklist "These are the leaf packages installed on your system.\nChoose the packages to deinstall:" \
+		  "$MAX" "$MAX" "$LINES" \
+	< "$DLGFILE" 2> "$TMPFILE"
 
 	[ $? = 255 ] && esci "Dialog Error, try to resize your terminal to at least 80x24." 1
 
@@ -112,6 +110,7 @@ trap 'esci "Ctrl+C Pressed, Program Aborted!" 1' INT
 DIALOG=bsddialog
 MAX=0
 LINES=13
+MAXPKGS=500
 PKGDELETE="pkg_delete"
 
 # Determine if pkgng is used on this machine (code taken from portmaster)
