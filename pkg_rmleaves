@@ -74,9 +74,9 @@ checkLeafs() {
 showList() {
 	cat "$TMPFILE" >> "$DLGFILE"
 	xargs -o -L "$MAXPKGS" "$DIALOG" \
-		  --item-bottom-desc --separate-output --clear-screen --cr-wrap --title "Welcome to pkg_rmleaves" \
-		  --checklist "These are the leaf packages installed on your system.\nChoose the packages to deinstall:" \
-		  "$MAX" "$MAX" "$LINES" \
+		--item-bottom-desc --separate-output --clear-screen --cr-wrap --title "Welcome to pkg_rmleaves" \
+		--checklist "These are the leaf packages installed on your system.\nChoose the packages to deinstall:" \
+		"$MAX" "$MAX" "$LINES" \
 	< "$DLGFILE" 2> "$TMPFILE"
 
 	[ $? = 255 ] && esci "Dialog Error, try to resize your terminal to at least 80x24." 1
@@ -110,12 +110,15 @@ trap 'esci "Ctrl+C Pressed, Program Aborted!" 1' INT
 DIALOG=bsddialog
 MAX=0
 LINES=13
-MAXPKGS=500
+MAXPKGS=250
 PKGDELETE="pkg_delete"
 
 # Determine if pkgng is used on this machine (code taken from portmaster)
 TMPDIR=/dev/null ASSUME_ALWAYS_YES=1 PACKAGESITE=file:///nonexistent \
 pkg info -x 'pkg(-devel)?$' > /dev/null 2>&1 && USE_PKGNG=yes && PKGDELETE="pkg delete -y -q"
+
+# Dry-run without removing anything (for testing)
+#PKGDELETE="sleep 1; echo "
 
 # Handle command line arguments
 for i in $(getopt l $*); do
