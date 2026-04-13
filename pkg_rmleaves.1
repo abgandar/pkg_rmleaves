@@ -1,8 +1,8 @@
-.TH PKG_RMLEAVES 1 "November 2013" FreeBSD
+.TH PKG_RMLEAVES 1 "March 2026" FreeBSD
 .SH NAME
 pkg_rmleaves \- deinstall 'leaf' packages
 .SH SYNOPSIS
-.B pkg_rmleaves [-l] [-d] [-x] [-X] [-k]
+.B pkg_rmleaves [-l]
 .SH DESCRIPTION
 .B pkg_rmleaves
 finds packages that are not required (depended on) by any other installed
@@ -15,32 +15,16 @@ become 'leaves' now because you've deinstalled the package(s) that
 depended on them. In every run you will be shown only packages that you
 haven't decided to keep yet in a previous run.
 .P
-This version automatically detects if you are using the new
+This version only supports the
 .B pkg(8)
-package management system (also known as pkgng) or still the old pkg_* tools.
-It works with both package management systems, but may show more information
-with the new
-.B pkg(8)
-system.
+package management system (also known as pkgng).
 .SH OPTIONS
 .IP -l
 List leaf packages only, one per line, and don't ask for anything to be
 deinstalled.
-.IP -d
-Use
-.B dialog
-(the default)
-.IP -x
-Use
-.B Xdialog
-.IP -X
-Use
-.B Xdialog
-in
-.B high compatibility mode
 .SH AUTHORS
 Timothy Redaelli <drizzt@freesbie.org>
 .br
 Alexander Wittig <alexander@wittig.name>
 .SH SEE ALSO
-dialog(1), pkg(8), pkg_delete(1), pkg_info(1)
+bsddialog(1), pkg(8)
