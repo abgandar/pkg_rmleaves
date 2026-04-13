@@ -49,18 +49,8 @@ esci() {
 
 # update leaf files
 checkLeafs() {
-	if [ -n "$USE_PKGNG" ]; then
-		pkg query -e '%#r = 0' '#&quot;#%n-%v#&quot;# #&quot;#%sh#&quot;# #&quot;#off#&quot;# #&quot;#%c#&quot;#'
-	else
-		for i in "$PKGDIR/"*; do
-			if [ ! -s "$i/+REQUIRED_BY" ]; then
-				pkg=$(basename "$i")
-				desc=''
-				[ -f "$i/+COMMENT" ] && desc=$(cat "$i/+COMMENT")
-				echo "#&quot;#$pkg#&quot;# #&quot;##&quot;# #&quot;#off#&quot;# #&quot;#$desc#&quot;#"
-			fi
-		done
-	fi | sort | sed -e "y/\"/'/" -e 's/#&quot;#/"/g' > "$PKGFILE"
+	pkg query -e '%#r = 0' '#&quot;#%n-%v#&quot;# #&quot;#%sh#&quot;# #&quot;#off#&quot;# #&quot;#%c#&quot;#' \
+	| sort | sed -e "y/\"/'/" -e 's/#&quot;#/"/g' > "$PKGFILE"
 
 	if [ -f "$PREV" ]; then
 		comm -1 -3 "$PREV" "$PKGFILE" > "$TMPFILE"
@@ -75,11 +65,12 @@ showList() {
 	cat "$TMPFILE" >> "$DLGFILE"
 	xargs -o -L "$MAXPKGS" "$DIALOG" \
 		--item-bottom-desc --separate-output --clear-screen --cr-wrap --title "Welcome to pkg_rmleaves" \
+		--cancel-exit-code 255 --esc-exit-code 255 \
 		--checklist "These are the leaf packages installed on your system.\nChoose the packages to deinstall:" \
 		"$MAX" "$MAX" "$LINES" \
 	< "$DLGFILE" 2> "$TMPFILE"
 
-	[ $? = 255 ] && esci "Dialog Error, try to resize your terminal to at least 80x24." 1
+	[ $? -ne 0 ] && esci "Dialog error, try to resize your terminal to at least 80x24." 1
 
 	if [ -s "$TMPFILE" ]; then
 		pkgs=$(cat "$TMPFILE")
@@ -111,11 +102,7 @@ DIALOG=bsddialog
 MAX=0
 LINES=13
 MAXPKGS=250
-PKGDELETE="pkg_delete"
-
-# Determine if pkgng is used on this machine (code taken from portmaster)
-TMPDIR=/dev/null ASSUME_ALWAYS_YES=1 PACKAGESITE=file:///nonexistent \
-pkg info -x 'pkg(-devel)?$' > /dev/null 2>&1 && USE_PKGNG=yes && PKGDELETE="pkg delete -y -q"
+PKGDELETE="pkg delete -y -q"
 
 # Dry-run without removing anything (for testing)
 #PKGDELETE="sleep 1; echo "
@@ -145,5 +132,5 @@ while true; do
 	[ ! -s "$TMPFILE" ] && esci "No more leaves found." 0
 
 	"$DIALOG" --clear-screen --yesno "Do you want to process the new leaf packages?" $MAX $MAX
-	[ $? != 0 ] && esci "Program terminated successfully." 0
+	[ $? -ne 0 ] && esci "Program terminated successfully." 0
 done
