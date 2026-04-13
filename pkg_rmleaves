@@ -70,7 +70,7 @@ showList() {
 		"$MAX" "$MAX" "$LINES" \
 	< "$DLGFILE" 2> "$TMPFILE"
 
-	[ $? -ne 0 ] && esci "Dialog error, try to resize your terminal to at least 80x24." 1
+	[ $? -ne 0 ] && esci "Program aborted." 1
 
 	if [ -s "$TMPFILE" ]; then
 		pkgs=$(cat "$TMPFILE")
@@ -95,7 +95,7 @@ showList() {
 # Call the functions
 
 # Trap ctrl+c and delete TMPDIR
-trap 'esci "Ctrl+C Pressed, Program Aborted!" 1' INT
+trap 'esci "Ctrl+C pressed, program aborted!" 1' INT
 
 # Set default values and prepare environment
 DIALOG=bsddialog
