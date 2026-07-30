@@ -75,7 +75,7 @@ showList() {
 		"$MAX" "$MAX" "$LINES" \
 	< "$DLGFILE" 2> "$TMPFILE"
 
-	[ $? -ne 0 ] && esci "Program aborted." 1
+	[ $? -ne 0 ] && esci "Program aborted, no packages deinstalled." 1
 
 	if [ -s "$TMPFILE" ]; then
 		pkgs=$(cat "$TMPFILE")
