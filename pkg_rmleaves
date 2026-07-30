@@ -63,10 +63,15 @@ checkLeafs() {
 # display the list of leaves
 showList() {
 	cp "$TMPFILE" "$DLGFILE"
+	if [ `wc -l <"$DLGFILE"` -le "$MAXPKGS" ]; then
+		MSG="These are all leaf packages installed on your system.\nChoose the packages to deinstall:"
+	else
+		MSG="These are some leaf packages installed on your system. The full list may span multiple dialogs.\nChoose the packages to deinstall:"
+	fi
 	xargs -o -L "$MAXPKGS" "$DIALOG" \
 		--item-bottom-desc --separate-output --clear-screen --cr-wrap --title "Welcome to pkg_rmleaves" \
 		--cancel-exit-code 255 --esc-exit-code 255 \
-		--checklist "These are the leaf packages installed on your system.\nChoose the packages to deinstall:" \
+		--checklist "$MSG" \
 		"$MAX" "$MAX" "$LINES" \
 	< "$DLGFILE" 2> "$TMPFILE"
 
