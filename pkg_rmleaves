@@ -36,7 +36,7 @@ TMPDIR=`mktemp -dt pkg_rmleaves`	# Directory for temporary files
 TMPFILE="$TMPDIR/tmp"				# Generic use temporary file
 DLGFILE="$TMPDIR/dlg"				# Filtered Dialog arguments
 PKGFILE="$TMPDIR/pkgs"				# Unfiltered package file
-PREV="$TMPDIR/prec"					# Previous unfiltered leaves file
+PREV="$TMPDIR/prev"					# Previous unfiltered leaves file
 
 PKGDIR="/var/db/pkg"                # Where legacy pkg_* stores its database
 
@@ -62,7 +62,7 @@ checkLeafs() {
 
 # display the list of leaves
 showList() {
-	cat "$TMPFILE" >> "$DLGFILE"
+	cp "$TMPFILE" "$DLGFILE"
 	xargs -o -L "$MAXPKGS" "$DIALOG" \
 		--item-bottom-desc --separate-output --clear-screen --cr-wrap --title "Welcome to pkg_rmleaves" \
 		--cancel-exit-code 255 --esc-exit-code 255 \
