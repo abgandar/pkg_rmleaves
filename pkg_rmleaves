@@ -68,11 +68,18 @@ showList() {
 	else
 		MSG="These are some leaf packages installed on your system. The full list may span multiple dialogs.\nChoose the packages to deinstall:"
 	fi
-	xargs -o -L "$MAXPKGS" "$DIALOG" \
-		--item-bottom-desc --separate-output --clear-screen --cr-wrap --title "Welcome to pkg_rmleaves" \
-		--cancel-exit-code 255 --esc-exit-code 255 \
-		--checklist "$MSG" \
-		"$MAX" "$MAX" "$LINES" \
+	# Only FBSD 15+
+	# xargs -o -L "$MAXPKGS" "$DIALOG" \
+	# 	--item-bottom-desc --separate-output --clear-screen --cr-wrap --title "Welcome to pkg_rmleaves" \
+	# 	--cancel-exit-code 255 --esc-exit-code 255 \
+	# 	--checklist "$MSG" \
+	# 	"$MAX" "$MAX" "$LINES" \
+	# < "$DLGFILE" 2> "$TMPFILE"
+	# For FBSD 14+ use ugly shell workaround to change all exit codes to 255
+	xargs -o -L "$MAXPKGS" sh -c "\"$DIALOG\" \
+		--item-bottom-desc --separate-output --clear-screen --cr-wrap --title \"Welcome to pkg_rmleaves\" \
+		--checklist \"$MSG\" \
+		\"$MAX\" \"$MAX\" \"$LINES\" \"\$@\" || exit 255" \
 	< "$DLGFILE" 2> "$TMPFILE"
 
 	[ $? -ne 0 ] && esci "Program aborted, no packages deinstalled." 1
