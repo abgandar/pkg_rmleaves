@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Copyright (c) 2025 Alexander Wittig <alexander@wittig.name>
+# Copyright (c) 2026 Alexander Wittig <alexander@wittig.name>
 # Copyright (c) 2005 Timothy Redaelli <drizzt@freesbie.org>
 #
 # All rights reserved.
@@ -75,11 +75,11 @@ showList() {
 	# 	--checklist "$MSG" \
 	# 	"$MAX" "$MAX" "$LINES" \
 	# < "$DLGFILE" 2> "$TMPFILE"
-	# For FBSD 14+ use ugly shell workaround to change all exit codes to 255
+	# For FBSD 14 use ugly shell workaround to change all non-zero exit codes to 255
 	xargs -o -L "$MAXPKGS" sh -c "\"$DIALOG\" \
 		--item-bottom-desc --separate-output --clear-screen --cr-wrap --title \"Welcome to pkg_rmleaves\" \
 		--checklist \"$MSG\" \
-		\"$MAX\" \"$MAX\" \"$LINES\" \"\$@\" || exit 255" \
+		\"$MAX\" \"$MAX\" \"$LINES\" \"\$@\" || exit 255" dummy \
 	< "$DLGFILE" 2> "$TMPFILE"
 
 	[ $? -ne 0 ] && esci "Program aborted, no packages deinstalled." 1
