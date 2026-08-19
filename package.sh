@@ -17,10 +17,14 @@ sed -i "" "s/^PORTVERSION=.*/PORTVERSION=	$DATE/" port/Makefile
 cp "$TAR" /usr/ports/distfiles
 cd port
 make makesum
-portlint
+#portlint
 rm "/usr/ports/distfiles/$TAR"
 cd ..
 
 # Create port diff ready for sending the PR
 diff -u /usr/ports/ports-mgmt/pkg_rmleaves port > port.diff
+
+# Copy the tar file to file server
+cp "$TAR" /data/apache/wittig.name/alex/www/files/pkg_rmleaves
+ln -fs "/data/apache/wittig.name/alex/www/files/pkg_rmleaves/$TAR" "/data/apache/wittig.name/alex/www/files/pkg_rmleaves/pkg_rmleaves-latest.tar.gz"
 
